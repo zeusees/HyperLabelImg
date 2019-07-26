@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "关键点编辑器", "Bezier.vcxproj", "{E4DB2A3D-AD1B-4F55-9503-597464986519}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		MinSizeRel|Win32 = MinSizeRel|Win32
+		MinSizeRel|x64 = MinSizeRel|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+		RelWithDebInfo|Win32 = RelWithDebInfo|Win32
+		RelWithDebInfo|x64 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.Debug|Win32.Build.0 = Debug|Win32
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.Debug|x64.ActiveCfg = Debug|x64
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.Debug|x64.Build.0 = Debug|x64
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.MinSizeRel|Win32.ActiveCfg = Release|Win32
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.MinSizeRel|Win32.Build.0 = Release|Win32
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.MinSizeRel|x64.ActiveCfg = Release|x64
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.MinSizeRel|x64.Build.0 = Release|x64
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.Release|Win32.ActiveCfg = Release|Win32
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.Release|Win32.Build.0 = Release|Win32
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.Release|x64.ActiveCfg = Release|x64
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.Release|x64.Build.0 = Release|x64
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.RelWithDebInfo|Win32.ActiveCfg = Release|Win32
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.RelWithDebInfo|Win32.Build.0 = Release|Win32
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.RelWithDebInfo|x64.ActiveCfg = Release|x64
+		{E4DB2A3D-AD1B-4F55-9503-597464986519}.RelWithDebInfo|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
