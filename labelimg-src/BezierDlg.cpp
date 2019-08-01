@@ -44,7 +44,7 @@ CBezierDlg::CBezierDlg(CWnd* pParent /*=NULL*/)
 	//移动矩形框
 	mBMovingRect = false;
 
-	m_nowMulti = 1;
+	m_nowMultiShow = 1.0;
 
 	//鼠标点击起始位置
 	mStartPt.x = 0;
@@ -82,12 +82,14 @@ BEGIN_MESSAGE_MAP(CBezierDlg, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_WM_SYSCOMMAND()
 
-	ON_BN_CLICKED(IDC_BTN_BIG, &CBezierDlg::OnBnClickedBtnBig)
-	ON_BN_CLICKED(IDC_BTN_ORIGIN, &CBezierDlg::OnBnClickedBtnOrigin)
+	
+
 	ON_BN_CLICKED(IDC_BUTTON_IN, &CBezierDlg::OnBnClickedButtonIn)
 	ON_WM_MOVING()
 	ON_BN_CLICKED(IDC_BTN_FOLDER, &CBezierDlg::OnBnClickedBtnFolder)
 	ON_LBN_SELCHANGE(IDC_LIST1, &CBezierDlg::OnLbnSelchangeList1)
+	ON_BN_CLICKED(IDC_BTN_DEL, &CBezierDlg::OnBnClickedBtnDel)
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 BOOL CBezierDlg::OnInitDialog()
@@ -118,6 +120,15 @@ BOOL CBezierDlg::OnInitDialog()
 */
 void CBezierDlg::DrawPoint(int start,int end,CDC* pDC)
 {
+	
+	// //用tmpNowPts做处理显示，m_points作为原始数据保持不变
+	vector<Point2f> tmpNowPts;
+	for (int k = 0; k < m_points.size(); ++k)
+    {
+		tmpNowPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow, m_points[k].y*m_nowMultiShow));
+	}
+
+
 	int disX = mNowPt.x - mStartPt.x;
 	int disY = mNowPt.y - mStartPt.y;
 	if (!mBMovingRect)
@@ -126,14 +137,14 @@ void CBezierDlg::DrawPoint(int start,int end,CDC* pDC)
 		disY = 0;
 	}
 
-	pDC->MoveTo(m_points[start].x+ disX, m_points[start].y+disY);
+	pDC->MoveTo(tmpNowPts[start].x+ disX, tmpNowPts[start].y+disY);
 	for(int i = start; i<=end; i++)
 	{
 			CPen penStroke(PS_SOLID,1,0x007700);
 			CPen *ppenPrevious=pDC->SelectObject(&penStroke);
-			pDC->LineTo(m_points[i].x+disX,m_points[i].y+disY);
+			pDC->LineTo(tmpNowPts[i].x+disX, tmpNowPts[i].y+disY);
 			if(i == end)
-				pDC->LineTo(m_points[start].x+disX, m_points[start].y+disY);
+				pDC->LineTo(tmpNowPts[start].x+disX, tmpNowPts[start].y+disY);
 
 			pDC->SelectObject(ppenPrevious);
 
@@ -153,7 +164,7 @@ void CBezierDlg::DrawPoint(int start,int end,CDC* pDC)
 
 			pDC->SetBkMode(TRANSPARENT);
 		
-			cv::Point2d pt = cv::Point( m_points[i].x+disX, m_points[i].y+disY);
+			cv::Point2d pt = cv::Point(tmpNowPts[i].x+disX, tmpNowPts[i].y+disY);
 			CPoint tmpPts[4];
 			int spanD = 6;
 			tmpPts[0].x = pt.x - spanD;
@@ -211,6 +222,9 @@ void CBezierDlg::OnPaint()
 			   ImageBk.Create(iCanvaW, 960, 24);
 				CImage Image;
 				cv::Mat dst = m_nowImg.clone();
+				cv::resize(dst, dst, cv::Size(m_nowImg.cols*m_nowMultiShow, m_nowImg.rows*m_nowMultiShow));
+
+
 				Image.Create(dst.cols,dst.rows,24);
 			
 				int i;	int j;
@@ -284,11 +298,19 @@ void CBezierDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	m_leftBtnDown = true;
 	// TODO: Add your message handler code here and/or call default
 	m_currentMark = -1;
+
+	// //用tmpNowPts做处理显示，m_points作为原始数据保持不变
+	vector<Point2f> tmpNowPts;
+	for (int k = 0; k < m_points.size(); ++k)
+	{
+		tmpNowPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow, m_points[k].y*m_nowMultiShow));
+	}
+
 		double x, y;
 		double t=56;
-		for(int i = 0; i < m_points.size(); i++)
+		for(int i = 0; i < tmpNowPts.size(); i++)
 		{
-			x = m_points[i].x - point.x, y = m_points[i].y - point.y;
+			x = tmpNowPts[i].x - point.x, y = tmpNowPts[i].y - point.y;
 			 x*=x; y*=y;
 			if(x + y < t)
 			{	
@@ -299,7 +321,7 @@ void CBezierDlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 		
 		//判断是否移动方框
-		if (cv::pointPolygonTest(m_points, cv::Point(point.x, point.y), true) > 4)
+		if (cv::pointPolygonTest(tmpNowPts, cv::Point(point.x, point.y), true) > 4)
 		{
 				mBMovingRect = true;
 				SetCursor(AfxGetApp()->LoadStandardCursor(IDC_HAND));
@@ -318,36 +340,32 @@ void CBezierDlg::OnLButtonDown(UINT nFlags, CPoint point)
 void CBezierDlg::OnLButtonUp(UINT nFlags, CPoint point) 
 {
 	//所有的数据进行初始化或者更新
-
-
-	//说明不是移动点，则是整张图片的移动
 	if ( m_leftBtnDown )
 	{
+		//说明不是移动点，则是整张图片的移动
 		if (m_currentMark < 0 && !mBMovingRect)
 		{
 			//把原始位置进行保存
 			mInitPt.x = mInitPt.x + mNowPt.x - mStartPt.x;
 			mInitPt.y = mInitPt.y + mNowPt.y - mStartPt.y;
-
-			mNowPt.x = 0;
-			mNowPt.y = 0;
-			mStartPt.x = 0;
-			mStartPt.y = 0;
 		}
 
 		if ( mBMovingRect)
 		{
 			for (int k = 0; k < m_points.size(); ++k)
 			{
-				m_points[k].x += (mNowPt.x - mStartPt.x);
-				m_points[k].y += (mNowPt.y - mStartPt.y);
+				m_points[k].x += (mNowPt.x - mStartPt.x)/m_nowMultiShow;
+				m_points[k].y += (mNowPt.y - mStartPt.y) / m_nowMultiShow;
 			}
 			mBMovingRect = false;
 		}
 	}
 
 
-
+	mNowPt.x = 0;
+	mNowPt.y = 0;
+	mStartPt.x = 0;
+	mStartPt.y = 0;
 
 	m_leftBtnDown = false;
 	// TODO: Add your message handler code here and/or call default
@@ -359,16 +377,21 @@ void CBezierDlg::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CBezierDlg::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	 //距离边界大于4个像素
-	
+	// //距离边界大于4个像素
+	// //用tmpPts做处理显示，m_points作为原始数据保持不变
+	//vector<Point2f> tmpPts;
+	//for (int k = 0; k < m_points.size(); ++k)
+	//{
+	//	tmpPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow, m_points[k].y*m_nowMultiShow));
+	//}
 
 	if (m_leftBtnDown)
 	{
 		mNowPt = point;
 		if (m_currentMark >= 0)
 		{//移动关键点
-			m_points[m_currentMark].x = mNowPt.x;
-			m_points[m_currentMark].y = mNowPt.y;
+			m_points[m_currentMark].x = mNowPt.x/ m_nowMultiShow;
+			m_points[m_currentMark].y = mNowPt.y/ m_nowMultiShow;
 		}
 		RedrawWindow();
 	}
@@ -418,7 +441,7 @@ void CBezierDlg::DoGetPtsAndDraw(CString fileName)
 	m_points[3].y = 100;
 
 
-	   m_nowMulti = 1;
+	m_nowMultiShow = 1.0;
 	   m_fileName=fileName; //文件名保存在了FilePathName里
 	   m_ptsName = m_fileName;
 
@@ -619,38 +642,7 @@ BOOL CBezierDlg::PreTranslateMessage(MSG* pMsg)
 }
 
 
-void CBezierDlg::OnBnClickedBtnBig()
-{
-	m_nowMulti ++;
-	if(!m_srcImg.empty())
-	{
-		resize(m_srcImg,m_nowImg,Size(m_srcImg.cols*m_nowMulti,m_srcImg.rows*m_nowMulti));
-		for(int k = 0;k<m_points.size();++k)
-		{
-			m_points[k].x = m_points[k].x*m_nowMulti;
-			m_points[k].y = m_points[k].y*m_nowMulti;
-		}
-	}
-	RedrawWindow();
-}
 
-
-void CBezierDlg::OnBnClickedBtnOrigin()
-{
-
-	if(!m_srcImg.empty())
-	{
-		m_nowImg = m_srcImg.clone();
-		for(int k = 0;k<m_points.size();++k)
-		{
-			m_points[k].x = m_points[k].x/m_nowMulti;
-			m_points[k].y = m_points[k].y/m_nowMulti;
-		}
-	}
-
-	RedrawWindow();
-	m_nowMulti = 1;
-}
 
 
 
@@ -841,4 +833,37 @@ void CBezierDlg::OnLbnSelchangeList1()
 	}
 									
 	
+}
+
+
+void CBezierDlg::OnBnClickedBtnDel()
+{
+	int iCurSel = mListBox.GetCurSel();
+	//得到当前选择索引
+	if (LB_ERR != iCurSel)
+	{
+		CString strTmp;
+		mListBox.GetText(iCurSel, strTmp);
+		DeleteFile(strTmp);
+		mListBox.DeleteString(iCurSel);
+	}
+}
+
+
+BOOL CBezierDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	if (zDelta > 0)
+	{
+		m_nowMultiShow += 0.1;
+	}
+	else
+	{
+		m_nowMultiShow -= 0.1;
+		if (m_nowMultiShow < 1) m_nowMultiShow = 1.0;
+
+	}
+	
+	RedrawWindow();
+	return CDialog::OnMouseWheel(nFlags, zDelta, pt);
 }

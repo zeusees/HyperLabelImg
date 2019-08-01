@@ -54,7 +54,7 @@ private:
 	bool m_bMouseMove;
 	bool m_leftBtnDown;
 	bool m_bKeyOper;
-	int m_nowMulti;
+	float m_nowMultiShow;//扩大倍数，只起到显示的作用
 
 	cv::Mat m_srcImg;
 	cv::Mat m_nowImg;
@@ -73,8 +73,6 @@ private:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	afx_msg void OnBnClickedBtnBig();
-	afx_msg void OnBnClickedBtnOrigin();
 
 	
 	void DrawPoint(int start,int end,CDC * pDc);
@@ -105,6 +103,8 @@ public:
 	afx_msg void OnBnClickedBtnFolder();
 	CListBox mListBox;
 	afx_msg void OnLbnSelchangeList1();
+	afx_msg void OnBnClickedBtnDel();
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };
 
 //{{AFX_INSERT_LOCATION}}

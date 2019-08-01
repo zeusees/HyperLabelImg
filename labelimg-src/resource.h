@@ -24,6 +24,7 @@
 #define IDC_BTN_FOLDER                  1015
 #define IDC_BUTTON3                     1016
 #define IDC_BUTTON_RIGHT                1016
+#define IDC_BTN_DEL                     1016
 #define IDC_BTN_XTOP                    1017
 #define IDC_BTN_XBOTTOM                 1018
 #define IDC_BTN_YLEFT                   1019
