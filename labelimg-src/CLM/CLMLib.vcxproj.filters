@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="SpecialEfect">
+      <UniqueIdentifier>{556aae90-6889-4fb3-b11e-c1c313fa7c91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{077c3516-ba18-41aa-abdb-1d1b66f20e7a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CCNF_patch_expert.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="clmInter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Patch_experts.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PAW.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PDM.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SpecialEfect\SpecialEfect.cpp">
+      <Filter>SpecialEfect</Filter>
+    </ClCompile>
+    <ClCompile Include="LandmarkDetectionValidator.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LandmarkDetectorFunc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LandmarkDetectorModel.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LandmarkDetectorParameters.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LandmarkDetectorUtils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\gLobalInfo.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="SVR_patch_expert.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CCNF_patch_expert.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="clmInter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LandMarkUpdate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Patch_experts.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PAW.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PDM.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SpecialEfect\SpecialEfect.h">
+      <Filter>SpecialEfect</Filter>
+    </ClInclude>
+    <ClInclude Include="LandmarkCoreIncludes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LandmarkDetectionValidator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LandmarkDetectorFunc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LandmarkDetectorModel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LandmarkDetectorParameters.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LandmarkDetectorUtils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\gLobalInfo.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="SVR_patch_expert.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

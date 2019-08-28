@@ -30,7 +30,7 @@ class CBezierDlg : public CDialog
 public:
 
 	CBezierDlg(CWnd* pParent = NULL);	// standard constructor
-
+	BOOL mBInited;
 // Dialog Data
 	//{{AFX_DATA(CBezierDlg)
 	enum { IDD = IDD_BEZIER_DIALOG };
@@ -41,13 +41,13 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
-
+	void ShowMax();
 // Implementation
 private:
 
 	CPaintDC * pDC;
 	int  m_currentMark;
-	vector<cv::Point2f> m_points;
+	std::vector<cv::Point2f> m_points;
 	CString m_fileName;
 	CString m_ptsName;
 	bool m_bDeleteFile;
@@ -75,8 +75,8 @@ private:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 	
-	void DrawPoint(int start,int end,CDC * pDc);
-
+	void DrawPoint(int start,int end,CDC * pDc,bool bTong =false);
+	
 	void DoGetPtsAndDraw(CString fileName);
 
 	//对文件夹，解析出里面的文件
@@ -105,6 +105,7 @@ public:
 	afx_msg void OnLbnSelchangeList1();
 	afx_msg void OnBnClickedBtnDel();
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 //{{AFX_INSERT_LOCATION}}

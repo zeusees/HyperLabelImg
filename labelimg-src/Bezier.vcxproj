@@ -257,8 +257,8 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <OutputFile>./$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>./OpenCV2.4.10/lib;./;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_core2410.lib;opencv_imgproc2410.lib;opencv_highgui2410.lib;nafxcw.lib;LIBCMT.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>./OpenCV2.4.10/lib;./lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core2410.lib;opencv_imgproc2410.lib;opencv_highgui2410.lib;CLMLib.lib;nafxcw.lib;LIBCMT.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib;nafxcw.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>

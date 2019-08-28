@@ -12,9 +12,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/core.hpp>
-
-#include "ImageLayer.h"
 #include "resource.h"
+#include "CLM\clmInter.h"
+#include <math.h>
 
 /*
   sunjunlishi
@@ -34,7 +34,7 @@ static char THIS_FILE[] = __FILE__;
 CBezierDlg::CBezierDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CBezierDlg::IDD, pParent)
 {
-
+	mBInited = false;
 
 	m_bMouseMove = false;
 	m_leftBtnDown = false;
@@ -56,6 +56,8 @@ CBezierDlg::CBezierDlg(CWnd* pParent /*=NULL*/)
 	mInitPt.x = 0;
 	mInitPt.y = 0;
 	m_currentMark = -1;
+
+	
 }
 
 void CBezierDlg::DoDataExchange(CDataExchange* pDX)
@@ -90,6 +92,7 @@ BEGIN_MESSAGE_MAP(CBezierDlg, CDialog)
 	ON_LBN_SELCHANGE(IDC_LIST1, &CBezierDlg::OnLbnSelchangeList1)
 	ON_BN_CLICKED(IDC_BTN_DEL, &CBezierDlg::OnBnClickedBtnDel)
 	ON_WM_MOUSEWHEEL()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 BOOL CBezierDlg::OnInitDialog()
@@ -110,15 +113,22 @@ BOOL CBezierDlg::OnInitDialog()
 	m_points.push_back(cv::Point(750, 500));
 	m_points.push_back(cv::Point(750, 550));
 	m_points.push_back(cv::Point(500, 550));
-	
+
+
+	CLM_DoInit();
+	mBInited = true;
+
+	ShowMax();
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
+
+
 /*
 
-	功能：画人脸关键点对应的 移动框
+	功能：关键点对应的 移动框，通路
 */
-void CBezierDlg::DrawPoint(int start,int end,CDC* pDC)
+void CBezierDlg::DrawPoint(int start,int end,CDC* pDC, bool bTong)
 {
 	
 	// //用tmpNowPts做处理显示，m_points作为原始数据保持不变
@@ -140,16 +150,20 @@ void CBezierDlg::DrawPoint(int start,int end,CDC* pDC)
 	pDC->MoveTo(tmpNowPts[start].x+ disX, tmpNowPts[start].y+disY);
 	for(int i = start; i<=end; i++)
 	{
-			CPen penStroke(PS_SOLID,1,0x007700);
+		//控制笔的颜色
+			CPen penStroke(PS_SOLID,2,0x007700);
 			CPen *ppenPrevious=pDC->SelectObject(&penStroke);
 			pDC->LineTo(tmpNowPts[i].x+disX, tmpNowPts[i].y+disY);
+
+			if(bTong)
 			if(i == end)
 				pDC->LineTo(tmpNowPts[start].x+disX, tmpNowPts[start].y+disY);
 
 			pDC->SelectObject(ppenPrevious);
 
-			CPen penStroke1(PS_SOLID,1,0x00FFFF);
-		    CPen penStroke2(PS_SOLID,1,0x0000FF);
+			//控制笔的颜色
+			CPen penStroke1(PS_SOLID,2,0x00FFFF);
+		    CPen penStroke2(PS_SOLID,2,0x0000FF);
 
 			CPen *ppenPrevious2;
 			if(m_currentMark == i)
@@ -166,7 +180,11 @@ void CBezierDlg::DrawPoint(int start,int end,CDC* pDC)
 		
 			cv::Point2d pt = cv::Point(tmpNowPts[i].x+disX, tmpNowPts[i].y+disY);
 			CPoint tmpPts[4];
-			int spanD = 6;
+			float scale = m_nowMultiShow*0.8;
+			if (scale < 1) scale = 1.0;
+			if (scale > 2.3) scale = 2.3;
+
+			int spanD = 7* scale;
 			tmpPts[0].x = pt.x - spanD;
 			tmpPts[0].y = pt.y - spanD;
 
@@ -268,11 +286,34 @@ void CBezierDlg::OnPaint()
 				Image.Draw(MemDC.m_hDC, mInitPt.x + mNowPt.x - mStartPt.x, mInitPt.y + mNowPt.y - mStartPt.y, 
 					Image.GetWidth(),Image.GetHeight());
 
-				if(m_points.size() > 0) 
+				char szBuf[256];
+				sprintf(szBuf,"%d", m_points.size());
+				if (m_points.size() == 68)
 				{
 					//脸轮廓
-					DrawPoint(0,3,&MemDC);
-			
+					DrawPoint(0, 16, &MemDC);
+					//左眉毛
+					DrawPoint(17, 21, &MemDC);
+					//右眉毛
+					DrawPoint(22, 26, &MemDC);
+					//鼻梁
+					DrawPoint(27, 30, &MemDC);
+					//鼻下滑线
+					DrawPoint(31, 35, &MemDC);
+					//左眼
+					DrawPoint(36, 41, &MemDC);
+					//右眼
+					DrawPoint(42, 47, &MemDC);
+					//嘴巴外轮廓
+					DrawPoint(48, 59, &MemDC);
+
+					//嘴巴 内轮廓
+					DrawPoint(60, 67, &MemDC);
+				}
+				else if(m_points.size() > 0)
+				{
+					//脸轮廓
+					DrawPoint(0,3,&MemDC,true);
 				}
 				//将内存中的图拷贝到屏幕上进行显示 
 				pDC->BitBlt(0,0 ,
@@ -306,8 +347,9 @@ void CBezierDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		tmpNowPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow, m_points[k].y*m_nowMultiShow));
 	}
 
+	    //满足条件则说明选中了关键点
 		double x, y;
-		double t=56;
+		double t=80* m_nowMultiShow;
 		for(int i = 0; i < tmpNowPts.size(); i++)
 		{
 			x = tmpNowPts[i].x - point.x, y = tmpNowPts[i].y - point.y;
@@ -319,22 +361,33 @@ void CBezierDlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 		}
 
-		
-		//判断是否移动方框
-		if (cv::pointPolygonTest(tmpNowPts, cv::Point(point.x, point.y), true) > 4)
+		//以拖动点为住，其次判断整个框
+		if (m_currentMark == -1)
 		{
+			vector<Point2f> tmpPolyPts;
+			for (int k = 0; k < min(16, (int)m_points.size()); ++k)
+			{
+				tmpPolyPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow, m_points[k].y*m_nowMultiShow));
+			}
+
+			//判断是否移动方框
+			if (cv::pointPolygonTest(tmpPolyPts, cv::Point(point.x, point.y), true) > 4)
+			{
 				mBMovingRect = true;
 				SetCursor(AfxGetApp()->LoadStandardCursor(IDC_HAND));
-		}
-		else
-		{
+			}
+			else
+			{
 				mBMovingRect = false;
 				SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
+			}
 		}
+	
+		
 		
 	
-	CDialog::OnLButtonDown(nFlags, point);
-	//RedrawWindow();
+	   CDialog::OnLButtonDown(nFlags, point);
+
 }
 
 void CBezierDlg::OnLButtonUp(UINT nFlags, CPoint point) 
@@ -377,13 +430,6 @@ void CBezierDlg::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CBezierDlg::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	// //距离边界大于4个像素
-	// //用tmpPts做处理显示，m_points作为原始数据保持不变
-	//vector<Point2f> tmpPts;
-	//for (int k = 0; k < m_points.size(); ++k)
-	//{
-	//	tmpPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow, m_points[k].y*m_nowMultiShow));
-	//}
 
 	if (m_leftBtnDown)
 	{
@@ -393,7 +439,11 @@ void CBezierDlg::OnMouseMove(UINT nFlags, CPoint point)
 			m_points[m_currentMark].x = mNowPt.x/ m_nowMultiShow;
 			m_points[m_currentMark].y = mNowPt.y/ m_nowMultiShow;
 		}
-		RedrawWindow();
+
+
+		CRect tRect;
+		GetClientRect(tRect);
+		RedrawWindow(tRect);
 	}
 	
 	if (mBMovingRect)
@@ -431,6 +481,9 @@ void CBezierDlg::DoGetPtsAndDraw(CString fileName)
 	mNowPt.x = 0;
 	mNowPt.y = 0;
 
+
+	m_points.resize(4);
+	//默认值是 4个角点
 	m_points[0].x = 10;
 	m_points[0].y = 10;
 	m_points[1].x = 400;
@@ -462,20 +515,44 @@ void CBezierDlg::DoGetPtsAndDraw(CString fileName)
 		ifstream locations(m_ptsName.GetBuffer(0), ios_base::in);
 		if(locations.is_open())
 		{
+			vector<cv::Point2f> tmpPts;
+			//多搞点点具体看能读取到多少点
+			tmpPts.resize(120);
 			string line;
+			int index = 0;
 			// The main file contains the references to other files
+			char szInfo[256];
 			while (!locations.eof())
 			{ 
-				
-				for(int i=0;i<4;i++)
-				{
-					locations>>m_points[i].x;
-					locations>>m_points[i].y;
-				}
 				getline(locations, line);
+				if (line.empty()) break;
+				stringstream lineStream(line);
+
+				int indexF = line.find(" ");
+				string str1;
+				lineStream >> str1;
+				strcpy(szInfo,str1.c_str());
+				tmpPts[index].x = atof(str1.c_str());
+				lineStream >> str1;
+				strcpy(szInfo, str1.c_str());
+				tmpPts[index].y = atof(str1.c_str());
+				sprintf(szInfo,"%.2f %.2f", tmpPts[index].x, tmpPts[index].y);
+
+				
+				index++;
 			}
-		 
+			m_points.resize(index);
+			for (int k = 0; k < index; ++k)
+				m_points[k] = tmpPts[k];
 			
+		}
+		else
+		{
+			if (DoDetectMarksInPic(m_nowImg))
+			{
+				m_points = GetMainPts();
+			}
+		
 		}
 		
 
@@ -542,19 +619,8 @@ void CBezierDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	if(nID == 61488)
 	{
-		int cx = GetSystemMetrics(SM_CXSCREEN);
-		int cy = GetSystemMetrics(SM_CYSCREEN);
-		MoveWindow(0,0,cx,cy);
-
-		GetDlgItem(IDC_BTN_ORIGIN)->MoveWindow(cx-240,5,110,40);
-		GetDlgItem(IDC_BTN_BIG)->MoveWindow(cx-120,5,110,40);
-
-		GetDlgItem(IDC_STATIC_PIC1)->MoveWindow(cx-240,55,240,2);
-		GetDlgItem(IDC_BTN_SAVE)->MoveWindow(cx-120,60,110,40);
-		GetDlgItem(IDC_STATIC_PIC)->MoveWindow(cx-240,115,240,2);
-
-
-	
+		//全屏消息
+		ShowMax();
 		Invalidate();
 	}
 	CDialog::OnSysCommand(nID, lParam);
@@ -589,6 +655,7 @@ BOOL CBezierDlg::PreTranslateMessage(MSG* pMsg)
 					{
 						m_points[m_currentMark].y-=span;
 						m_bKeyOper = true;
+						
 						RedrawWindow();
 					}
 				}
@@ -598,26 +665,12 @@ BOOL CBezierDlg::PreTranslateMessage(MSG* pMsg)
 					{
 						m_points[m_currentMark].y+=span;
 						m_bKeyOper = true;
-						RedrawWindow();
+						CRect tRect;
+						GetClientRect(tRect);
+						RedrawWindow(tRect);
 					}
 				break;
-			case VK_RIGHT:
-				if(m_currentMark > 0)
-					{
-						m_points[m_currentMark].x+=span;
-						m_bKeyOper = true;
-						RedrawWindow();
-					}
-				break;
-			case VK_LEFT:
-				if(m_currentMark > 0)
-					{
-						m_points[m_currentMark].x-=span;
-						m_bKeyOper = true;
-						RedrawWindow();
-					}
-			
-				break;
+
 			default:
 				break;
 			}
@@ -706,6 +759,7 @@ void CBezierDlg::DrawThePicPoint(cv::Mat clmResult, int posX, int posY, int dstW
 
 	ReleaseDC(pDC);
 }
+
 void CBezierDlg::OnBnClickedButtonIn()
 {
 
@@ -863,7 +917,40 @@ BOOL CBezierDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		if (m_nowMultiShow < 1) m_nowMultiShow = 1.0;
 
 	}
-	
-	RedrawWindow();
+	//告诉背景不用刷新
+	m_bKeyOper = true;
+	CRect tRect;
+	GetClientRect(tRect); 
+	tRect.SetRect(tRect.left,tRect.top,tRect.Width()-220,tRect.Height());
+	RedrawWindow(tRect);
 	return CDialog::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+void CBezierDlg::ShowMax()
+{
+	int cx = GetSystemMetrics(SM_CXSCREEN);
+	int cy = GetSystemMetrics(SM_CYSCREEN);
+
+	MoveWindow(0, 0, cx, cy);
+	GetDlgItem(IDC_CHECK1)->MoveWindow(cx - 230, 5, 50, 40);
+	GetDlgItem(IDC_BTN_FOLDER)->MoveWindow(cx - 160, 5, 70, 40);
+	GetDlgItem(IDC_BUTTON_IN)->MoveWindow(cx - 90, 5, 70, 40);
+
+	GetDlgItem(IDC_LIST1)->MoveWindow(cx - 240, 55, 220, cy - 190);
+	GetDlgItem(IDC_BTN_DEL)->MoveWindow(cx - 120, cy - 130, 110, 40);
+	
+
+}
+void CBezierDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialog::OnSize(nType, cx, cy);
+
+
+	if (nType == SIZE_RESTORED || nType == SIZE_MAXIMIZED)
+	{
+		if (mBInited)
+		{
+			ShowMax();
+		}
+	}
 }

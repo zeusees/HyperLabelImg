@@ -1,0 +1,42 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ncnn", "ncnn.vcxproj", "{BCE7C960-CA8C-35D7-BC40-FDF33197C506}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		MinSizeRel|Win32 = MinSizeRel|Win32
+		MinSizeRel|x64 = MinSizeRel|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+		RelWithDebInfo|Win32 = RelWithDebInfo|Win32
+		RelWithDebInfo|x64 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.Debug|Win32.Build.0 = Debug|Win32
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.Debug|x64.ActiveCfg = Debug|x64
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.Debug|x64.Build.0 = Debug|x64
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.Release|Win32.ActiveCfg = Release|Win32
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.Release|Win32.Build.0 = Release|Win32
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.Release|x64.ActiveCfg = Release|x64
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.Release|x64.Build.0 = Release|x64
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{BCE7C960-CA8C-35D7-BC40-FDF33197C506}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FAF9A5D8-CC21-3280-B953-A33FD68ABF5F}
+	EndGlobalSection
+EndGlobal
