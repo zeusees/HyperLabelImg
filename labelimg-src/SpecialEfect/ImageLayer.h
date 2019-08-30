@@ -1,10 +1,5 @@
 #pragma once
-/*
-	photoshop一些 图层效果的处理
-	图层混合方式，带透明通道的混合
-	亮度混合-上层的亮度混合到下层，采用lab空间
-	sunjunlishi
-*/
+
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc.hpp>

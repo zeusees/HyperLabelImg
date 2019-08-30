@@ -16,10 +16,7 @@
 #include "CLM\clmInter.h"
 #include <math.h>
 
-/*
-  sunjunlishi
 
-*/
 using namespace std;
 using namespace cv;
 #ifdef _DEBUG
