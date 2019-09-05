@@ -83,7 +83,7 @@ int Eltwise::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top
         {
             // first blob
             const Mat& bottom_blob1 = bottom_blobs[1];
-            #pragma omp parallel for
+        
             for (int q=0; q<channels; q++)
             {
                 const float* ptr = bottom_blob.channel(q);

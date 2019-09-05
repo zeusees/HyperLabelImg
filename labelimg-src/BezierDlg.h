@@ -63,7 +63,8 @@ private:
 
 	CPoint mStartPt;
 	CPoint mNowPt;
-	BOOL mBMovingRect;
+	BOOL mBMovingRect;//
+	BOOL mBMovingEdge;//ÍÏ¶¯±ß½ç
 private:
 	afx_msg void OnBnClickedBtnImport();
 	afx_msg void OnBnClickedBtnSave();

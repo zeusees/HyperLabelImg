@@ -50,7 +50,8 @@ ncnn::Net *  _net = NULL;
 
     std::vector<Anchor> proposals;
     proposals.clear();
-
+	char szBuf[256];
+	sprintf(szBuf,"%d", _feat_stride_fpn.size());
     for (int i = 0; i < _feat_stride_fpn.size(); ++i) { 
     	ncnn::Mat cls;
     	ncnn::Mat reg;

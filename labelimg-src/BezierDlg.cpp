@@ -53,7 +53,7 @@ CBezierDlg::CBezierDlg(CWnd* pParent /*=NULL*/)
 	mInitPt.x = 0;
 	mInitPt.y = 0;
 	m_currentMark = -1;
-
+	mBMovingEdge = false;
 	
 }
 
@@ -127,34 +127,93 @@ BOOL CBezierDlg::OnInitDialog()
 */
 void CBezierDlg::DrawPoint(int start,int end,CDC* pDC, bool bTong)
 {
-	
-	// //用tmpNowPts做处理显示，m_points作为原始数据保持不变
-	vector<Point2f> tmpNowPts;
-	for (int k = 0; k < m_points.size(); ++k)
-    {
-		tmpNowPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow, m_points[k].y*m_nowMultiShow));
-	}
-
+	//根据当前移动状态，对值 进行判别
 
 	int disX = mNowPt.x - mStartPt.x;
 	int disY = mNowPt.y - mStartPt.y;
-	if (!mBMovingRect)
+	
+	// //用tmpNowPts做处理显示，m_points作为原始数据保持不变
+	vector<Point2f> tmpNowPts;
+	char szBuf[256];
+	if (mBMovingEdge)
+	{	//移动的是边界，则找到与之最近的点，进行相对的移动
+		int span = 6 * m_nowMultiShow;
+		if (span > 15) span = 15;
+		//仅仅移动X或者Y
+		sprintf(szBuf, "%d %d", disX,disY);
+		if (abs(disX) > abs(disY))
+		{
+			disY = 0;
+			for (int m = 0; m < m_points.size(); ++m)
+			{
+				Point2f tp = m_points[m];
+				sprintf(szBuf,"%d", mNowPt.x - tp.x*m_nowMultiShow - disX);
+				if (abs(mNowPt.x - tp.x*m_nowMultiShow - disX) < span)
+				{
+					tmpNowPts.push_back(cv::Point2f(m_points[m].x*m_nowMultiShow+disX,
+						m_points[m].y*m_nowMultiShow));
+				}
+				else
+				{
+					//其他不变
+					tmpNowPts.push_back(cv::Point2f(m_points[m].x*m_nowMultiShow,
+						m_points[m].y*m_nowMultiShow));
+				}
+			}
+		}
+		else
+		{
+			disX = 0;
+
+			for (int m = 0; m < m_points.size(); ++m)
+			{
+				Point2f tp = m_points[m];
+				if (abs(mNowPt.y - tp.y*m_nowMultiShow - disY) < span)
+				{
+					tmpNowPts.push_back(cv::Point2f(m_points[m].x*m_nowMultiShow,
+						m_points[m].y*m_nowMultiShow+disY));
+				}
+				else
+				{
+					tmpNowPts.push_back(cv::Point2f(m_points[m].x*m_nowMultiShow,
+						m_points[m].y*m_nowMultiShow ));
+				}
+			}
+		}
+		
+
+	}
+	else
 	{
-		disX = 0;
-		disY = 0;
+		if (!mBMovingRect)
+		{
+			disX = 0;
+			disY = 0;
+		}
+
+
+		for (int k = 0; k < m_points.size(); ++k)
+		{
+			tmpNowPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow + disX, 
+				m_points[k].y*m_nowMultiShow + disY));
+		}
 	}
 
-	pDC->MoveTo(tmpNowPts[start].x+ disX, tmpNowPts[start].y+disY);
+	
+
+
+	
+	pDC->MoveTo(tmpNowPts[start].x, tmpNowPts[start].y);
 	for(int i = start; i<=end; i++)
 	{
 		//控制笔的颜色
 			CPen penStroke(PS_SOLID,2,0x007700);
 			CPen *ppenPrevious=pDC->SelectObject(&penStroke);
-			pDC->LineTo(tmpNowPts[i].x+disX, tmpNowPts[i].y+disY);
+			pDC->LineTo(tmpNowPts[i].x, tmpNowPts[i].y);
 
 			if(bTong)
 			if(i == end)
-				pDC->LineTo(tmpNowPts[start].x+disX, tmpNowPts[start].y+disY);
+				pDC->LineTo(tmpNowPts[start].x, tmpNowPts[start].y);
 
 			pDC->SelectObject(ppenPrevious);
 
@@ -175,13 +234,13 @@ void CBezierDlg::DrawPoint(int start,int end,CDC* pDC, bool bTong)
 
 			pDC->SetBkMode(TRANSPARENT);
 		
-			cv::Point2d pt = cv::Point(tmpNowPts[i].x+disX, tmpNowPts[i].y+disY);
+			cv::Point2d pt = cv::Point(tmpNowPts[i].x, tmpNowPts[i].y);
 			CPoint tmpPts[4];
 			float scale = m_nowMultiShow*0.8;
 			if (scale < 1) scale = 1.0;
-			if (scale > 2.3) scale = 2.3;
-
+			if (scale > 2.0) scale = 2.0;
 			int spanD = 7* scale;
+
 			tmpPts[0].x = pt.x - spanD;
 			tmpPts[0].y = pt.y - spanD;
 
@@ -275,8 +334,9 @@ void CBezierDlg::OnPaint()
 				CBitmap  *pOldBit=MemDC.SelectObject(&MemBitmap); 
 
 				ImageBk.Draw(MemDC.m_hDC, 0, 0, iCanvaW,960);
-				if (mBMovingRect || m_currentMark >=0)
+				if (mBMovingRect || m_currentMark >=0 || mBMovingEdge)
 				{//仅仅移动框 或者 移动点的情况下，背景画面不需要移动
+					//移动边界
 					Image.Draw(MemDC.m_hDC, mInitPt.x, mInitPt.y,Image.GetWidth(), Image.GetHeight());
 				}
 				else
@@ -334,6 +394,8 @@ void CBezierDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	mStartPt = point;
 	mNowPt = point;
 	m_leftBtnDown = true;
+	mBMovingRect = false;
+	mBMovingEdge = false;//先初始化
 	// TODO: Add your message handler code here and/or call default
 	m_currentMark = -1;
 
@@ -367,16 +429,23 @@ void CBezierDlg::OnLButtonDown(UINT nFlags, CPoint point)
 				tmpPolyPts.push_back(cv::Point2f(m_points[k].x*m_nowMultiShow, m_points[k].y*m_nowMultiShow));
 			}
 
+			int span = m_nowMultiShow * 9;
+			if (span > 20) span = 20;
 			//判断是否移动方框
-			if (cv::pointPolygonTest(tmpPolyPts, cv::Point(point.x, point.y), true) > 4)
+			int iDis = cv::pointPolygonTest(tmpPolyPts, cv::Point(point.x, point.y), true);
+			if (iDis > span)
 			{
 				mBMovingRect = true;
 				SetCursor(AfxGetApp()->LoadStandardCursor(IDC_HAND));
 			}
 			else
 			{
-				mBMovingRect = false;
+				
 				SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
+				if (iDis < span && iDis > -span)
+				{
+					mBMovingEdge = true;
+				}
 			}
 		}
 	
@@ -393,21 +462,68 @@ void CBezierDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	if ( m_leftBtnDown )
 	{
 		//说明不是移动点，则是整张图片的移动
-		if (m_currentMark < 0 && !mBMovingRect)
+		if (m_currentMark < 0 && !mBMovingRect && !mBMovingEdge)
 		{
 			//把原始位置进行保存
 			mInitPt.x = mInitPt.x + mNowPt.x - mStartPt.x;
 			mInitPt.y = mInitPt.y + mNowPt.y - mStartPt.y;
 		}
 
-		if ( mBMovingRect)
+
+		if (mBMovingEdge)
+		{
+			int disX = mNowPt.x - mStartPt.x;
+			int disY = mNowPt.y - mStartPt.y;
+
+			char szBuf[256];
+			if (mBMovingEdge)
+			{	//移动的是边界，则找到与之最近的点，进行相对的移动
+				int span = 9 * m_nowMultiShow;
+				if (span > 15) span = 18;
+				////仅仅移动X或者Y
+				sprintf(szBuf, "%d %d", disX, disY);
+				if (abs(disX) > abs(disY))
+				{
+					disY = 0;
+					for (int m = 0; m < m_points.size(); ++m)
+					{
+						Point2f tp = m_points[m];
+						sprintf(szBuf, "%d", mNowPt.x - tp.x*m_nowMultiShow - disX);
+						if (abs(mNowPt.x - tp.x*m_nowMultiShow - disX) < span)
+						{
+							m_points[m] = cv::Point2f((m_points[m].x*m_nowMultiShow + disX)/ m_nowMultiShow,
+								m_points[m].y);
+						}
+						
+					}
+				}
+				else
+				{
+					disX = 0;
+
+					for (int m = 0; m < m_points.size(); ++m)
+					{
+						Point2f tp = m_points[m];
+						if (abs(mNowPt.y - tp.y*m_nowMultiShow - disY) < span)
+						{
+							m_points[m] = cv::Point2f(m_points[m].x,
+								(m_points[m].y*m_nowMultiShow + disY)/ m_nowMultiShow);
+						}
+						
+					}
+				}
+
+
+			}
+		}
+		else if ( mBMovingRect)
 		{
 			for (int k = 0; k < m_points.size(); ++k)
 			{
 				m_points[k].x += (mNowPt.x - mStartPt.x)/m_nowMultiShow;
 				m_points[k].y += (mNowPt.y - mStartPt.y) / m_nowMultiShow;
 			}
-			mBMovingRect = false;
+			
 		}
 	}
 
@@ -416,7 +532,8 @@ void CBezierDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	mNowPt.y = 0;
 	mStartPt.x = 0;
 	mStartPt.y = 0;
-
+	mBMovingRect = false;
+	mBMovingEdge = false;
 	m_leftBtnDown = false;
 	// TODO: Add your message handler code here and/or call default
 	m_bMouseMove = false;
@@ -483,12 +600,12 @@ void CBezierDlg::DoGetPtsAndDraw(CString fileName)
 	//默认值是 4个角点
 	m_points[0].x = 10;
 	m_points[0].y = 10;
-	m_points[1].x = 400;
+	m_points[1].x = 200;
 	m_points[1].y = 10;
-	m_points[2].x = 400;
-	m_points[2].y = 100;
+	m_points[2].x = 200;
+	m_points[2].y = 200;
 	m_points[3].x = 10;
-	m_points[3].y = 100;
+	m_points[3].y = 200;
 
 
 	m_nowMultiShow = 1.0;
@@ -496,6 +613,19 @@ void CBezierDlg::DoGetPtsAndDraw(CString fileName)
 	   m_ptsName = m_fileName;
 
 	   m_srcImg = cv::imread(m_fileName.GetBuffer(0));
+	   //如果图片大于
+	   if (m_srcImg.cols > 1500)
+	   {
+		   cv::resize(m_srcImg, m_srcImg,Size(1500, m_srcImg.rows*1500/ m_srcImg.cols));
+		   cv::imwrite(m_fileName.GetBuffer(0), m_srcImg);
+	   }
+	   else if (m_srcImg.cols < 600)
+	   {
+		   cv::resize(m_srcImg, m_srcImg, Size(800, m_srcImg.rows * 800 / m_srcImg.cols));
+		   cv::imwrite(m_fileName.GetBuffer(0), m_srcImg);
+	   }
+
+
 	   m_nowImg = m_srcImg.clone();
 	   Invalidate();
 	
@@ -545,10 +675,15 @@ void CBezierDlg::DoGetPtsAndDraw(CString fileName)
 		}
 		else
 		{
-			if (DoDetectMarksInPic(m_nowImg))
+			//如果设置检测人脸；才能处理人脸
+			if (((CButton*)GetDlgItem(IDC_CHECKFACE))->GetCheck())
 			{
-				m_points = GetMainPts();
+				if (DoDetectMarksInPic(m_nowImg))
+				{
+					m_points = GetMainPts();
+				}
 			}
+			
 		
 		}
 		

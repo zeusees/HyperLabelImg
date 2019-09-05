@@ -36,6 +36,7 @@
 #define IDC_BTN_CNN3D                   1024
 #define IDC_LIST1                       1026
 #define IDC_CHECK1                      1027
+#define IDC_CHECKFACE                   1027
 
 // Next default values for new objects
 // 
